@@ -9,8 +9,8 @@ import numpy as np
 import cv2
 
 
-def enhance_cad_image(input_path: str, output_path: str, line_thickness: int = 2,
-                       contrast_boost: float = 1.5, sharpen: bool = True) -> bool:
+def enhance_cad_image(input_path: str, output_path: str, line_thickness: int = 3,
+                       contrast_boost: float = 2.0, sharpen: bool = True) -> bool:
     """
     Poprawia jakość zdjęcia CAD poprzez pogrubienie linii i zwiększenie kontrastu.
 
@@ -47,15 +47,25 @@ def enhance_cad_image(input_path: str, output_path: str, line_thickness: int = 2
         # Konwersja do skali szarości
         gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
 
-        # Binaryzacja - wyodrębnienie czarnych linii
-        # Inwersja: czarne linie stają się białe, tło czarne
-        _, binary = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+        # Najpierw zwiększ kontrast w skali szarości dla lepszego wykrycia linii
+        gray = cv2.convertScaleAbs(gray, alpha=1.3, beta=-20)
 
-        # Pogrubienie linii za pomocą dylacji
-        if line_thickness > 1:
-            kernel_size = line_thickness
+        # Binaryzacja adaptacyjna - lepiej wykrywa linie o różnej intensywności
+        # Kombinacja dwóch metod dla najlepszego rezultatu
+        binary1 = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                        cv2.THRESH_BINARY_INV, 11, 2)
+        _, binary2 = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY_INV)
+
+        # Połącz obie metody (OR) - wykryje więcej linii
+        binary = cv2.bitwise_or(binary1, binary2)
+
+        # Pogrubienie linii za pomocą dylacji - używamy więcej iteracji dla silniejszego efektu
+        if line_thickness > 0:
+            kernel_size = max(2, line_thickness)
             kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
-            binary = cv2.dilate(binary, kernel, iterations=1)
+            # Zwiększamy liczbę iteracji dla grubszych linii
+            iterations = 1 if line_thickness <= 2 else 2
+            binary = cv2.dilate(binary, kernel, iterations=iterations)
 
         # Inwersja z powrotem: białe linie na czarnym tle -> czarne linie na białym tle
         result_gray = cv2.bitwise_not(binary)
@@ -110,7 +120,7 @@ def enhance_cad_image(input_path: str, output_path: str, line_thickness: int = 2
 
 
 def process_directory(input_dir: str, output_dir: str = None,
-                      line_thickness: int = 2, contrast_boost: float = 1.5,
+                      line_thickness: int = 3, contrast_boost: float = 2.0,
                       sharpen: bool = True, recursive: bool = False) -> tuple:
     """
     Przetwarza wszystkie obrazy PNG w katalogu.
@@ -177,7 +187,7 @@ def process_directory(input_dir: str, output_dir: str = None,
 
 
 def process_single_file(input_file: str, output_file: str = None,
-                        line_thickness: int = 2, contrast_boost: float = 1.5,
+                        line_thickness: int = 3, contrast_boost: float = 2.0,
                         sharpen: bool = True) -> bool:
     """
     Przetwarza pojedynczy plik obrazu.
@@ -230,10 +240,10 @@ Przykłady użycia:
     parser.add_argument("-o", "--output", help="Ścieżka do pliku wyjściowego")
     parser.add_argument("-d", "--directory", help="Katalog z plikami do przetworzenia")
     parser.add_argument("-od", "--output-dir", help="Katalog na pliki wyjściowe")
-    parser.add_argument("-t", "--thickness", type=int, default=2, choices=range(1, 6),
-                        help="Grubość pogrubienia linii (1-5, domyślnie: 2)")
-    parser.add_argument("-c", "--contrast", type=float, default=1.5,
-                        help="Współczynnik kontrastu (domyślnie: 1.5)")
+    parser.add_argument("-t", "--thickness", type=int, default=3, choices=range(1, 6),
+                        help="Grubość pogrubienia linii (1-5, domyślnie: 3)")
+    parser.add_argument("-c", "--contrast", type=float, default=2.0,
+                        help="Współczynnik kontrastu (domyślnie: 2.0)")
     parser.add_argument("-ns", "--no-sharpen", action="store_true",
                         help="Wyłącz wyostrzanie")
     parser.add_argument("-r", "--recursive", action="store_true",
