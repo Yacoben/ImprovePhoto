@@ -1,0 +1,172 @@
+╔════════════════════════════════════════════════════════════════╗
+║                                                                ║
+║          IMPROVE PHOTO - Program do poprawy miniatur CAD       ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────┐
+│  STATUS: ✅ Program gotowy do użycia!                          │
+│  Python: 3.13 ✅ Zainstalowany                                 │
+│  Pakiety: ✅ opencv-python, numpy, Pillow                      │
+└────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════
+  NAJWAŻNIEJSZE KOMENDY
+═══════════════════════════════════════════════════════════════════
+
+📌 STANDARDOWE PRZETWARZANIE:
+
+   run.bat -d "X:\0.0.0.0 MINIATURY ELEMENTÓW" -r
+
+   → Przetwarza cały katalog z podkatalogami
+   → NADPISUJE pliki w miejscu
+
+
+📌 MAKSYMALNA WIDOCZNOŚĆ LINII (ZALECANE):
+
+   run.bat -d "X:\0.0.0.0 MINIATURY ELEMENTÓW" -r -e
+
+   → Dodaje extra enhance (-e)
+   → Najlepsza widoczność cienkich linii CAD
+
+
+📌 ULTRA MOCNE (dla bardzo słabych linii):
+
+   run.bat -d "X:\0.0.0.0 MINIATURY ELEMENTÓW" -r -t 5 -c 3.0 -e
+
+   → Maksymalna grubość linii (5)
+   → Maksymalny kontrast (3.0)
+   → Extra enhance
+
+
+📌 ZACHOWANIE ORYGINAŁÓW:
+
+   run.bat -d "źródło" -od "wynik" -r
+
+   → Zapisuje do osobnego katalogu
+   → Oryginały pozostają nietknięte
+
+
+═══════════════════════════════════════════════════════════════════
+  WSZYSTKIE PARAMETRY
+═══════════════════════════════════════════════════════════════════
+
+-d "ścieżka"          Katalog do przetworzenia
+-r                    Przeszukuj podkatalogi (ZALECANE)
+-e                    Extra enhance - maksymalna widoczność
+-t [1-5]              Grubość linii (domyślnie: 4)
+-c [1.0-5.0]          Kontrast (domyślnie: 2.5)
+-od "ścieżka"         Katalog wyjściowy (opcjonalnie)
+-ns                   Wyłącz wyostrzanie
+-h                    Pomoc
+
+
+═══════════════════════════════════════════════════════════════════
+  ALTERNATYWNE SPOSOBY URUCHOMIENIA
+═══════════════════════════════════════════════════════════════════
+
+1️⃣  Podwójne kliknięcie: quick_process.bat
+    → Interaktywne menu z wyborem trybu
+
+
+2️⃣  Przeciągnij i upuść:
+    → Przeciągnij plik PNG na run.bat
+
+
+3️⃣  PowerShell:
+    → .\run.ps1 -d "katalog" -r -e
+
+
+═══════════════════════════════════════════════════════════════════
+  WAŻNE INFORMACJE
+═══════════════════════════════════════════════════════════════════
+
+⚠️  UWAGA: Program NADPISUJE oryginalne pliki!
+    → Zrób kopię zapasową przed pierwszym użyciem
+    → LUB użyj opcji -od do zapisu w osobnym folderze
+
+✅  Program automatycznie:
+    → Znajduje wszystkie pliki PNG
+    → Przeszukuje podkatalogi (z -r)
+    → Zachowuje przezroczystość (kanał alfa)
+    → Obsługuje polskie znaki w ścieżkach
+    → Kompresuje PNG dla mniejszego rozmiaru
+
+📁  Wymagania:
+    → Pliki w formacie PNG
+    → Czarne linie na białym tle
+    → Screeny z CAD Inventor
+
+
+═══════════════════════════════════════════════════════════════════
+  CO ROBI PROGRAM?
+═══════════════════════════════════════════════════════════════════
+
+Program wykonuje następujące operacje:
+
+1. Wykrywa czarne linie na obrazie (binaryzacja adaptacyjna)
+2. Pogrubia linie (dylacja morfologiczna)
+3. [Opcja -e] Dodatkowe wzmocnienie i łączenie przerw
+4. Zwiększa kontrast (CLAHE)
+5. Wyostrza krawędzie
+6. Zapisuje jako skompresowany PNG
+
+
+═══════════════════════════════════════════════════════════════════
+  PRZYKŁADOWE REZULTATY
+═══════════════════════════════════════════════════════════════════
+
+Domyślne ustawienia (bez -e):
+• Grubość linii: +33% (z 3 na 4)
+• Kontrast: +25% (z 2.0 na 2.5)
+• Wyostrzanie: TAK
+
+Z opcją -e (extra enhance):
+• Wszystko powyżej PLUS:
+• Dodatkowe pogrubienie
+• Łączenie przerw w liniach
+• Wygładzenie krawędzi
+
+
+═══════════════════════════════════════════════════════════════════
+  ROZWIĄZYWANIE PROBLEMÓW
+═══════════════════════════════════════════════════════════════════
+
+❌ "Nie można wczytać obrazu"
+   → Sprawdź czy plik to PNG
+   → Sprawdź uprawnienia do pliku
+
+❌ "Nie znaleziono Pythona"
+   → Python 3.13 powinien być w:
+     C:\Users\User\AppData\Local\Programs\Python\Python313\
+
+❌ Linie nadal za cienkie
+   → Użyj opcji -e
+   → Zwiększ thickness: -t 5
+   → Zwiększ kontrast: -c 3.0
+
+❌ Linie za grube
+   → Zmniejsz thickness: -t 2
+   → Zmniejsz kontrast: -c 1.5
+
+
+═══════════════════════════════════════════════════════════════════
+  WIĘCEJ INFORMACJI
+═══════════════════════════════════════════════════════════════════
+
+📖 README.md          → Pełna dokumentacja
+📄 INSTRUKCJA.txt     → Szybki start
+📋 CHANGELOG.md       → Podsumowanie zmian
+💡 run.bat -h         → Pomoc programu
+
+
+═══════════════════════════════════════════════════════════════════
+
+Program stworzony do poprawy jakości miniatur elementów
+konstrukcyjnych z CAD Inventor dla dokumentacji PDF.
+
+                            Powodzenia! 🚀
+
+═══════════════════════════════════════════════════════════════════
+

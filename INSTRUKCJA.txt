@@ -1,0 +1,56 @@
+===============================================
+  IMPROVE PHOTO - SZYBKI START
+===============================================
+
+PODSTAWOWE UŻYCIE:
+------------------
+
+1. Przetwarzanie całego katalogu z podkatalogami (ZALECANE):
+
+   run.bat -d "X:\0.0.0.0 MINIATURY ELEMENTÓW" -r
+
+   Pliki zostaną NADPISANE w miejscu!
+
+
+2. Przetwarzanie z MAKSYMALNĄ widocznością linii:
+
+   run.bat -d "X:\0.0.0.0 MINIATURY ELEMENTÓW" -r -e
+
+
+3. Przetwarzanie do osobnego katalogu (zachowuje oryginały):
+
+   run.bat -d "X:\0.0.0.0 MINIATURY ELEMENTÓW" -od "C:\Wyniki" -r
+
+
+PARAMETRY:
+----------
+
+-d "ścieżka"     = Katalog do przetworzenia
+-r               = Przeszukuj podkatalogi
+-e               = Dodatkowe wzmocnienie linii (MAKSYMALNA widoczność)
+-t 1-5           = Grubość linii (domyślnie 4)
+-c 1.0-5.0       = Kontrast (domyślnie 2.5)
+-od "ścieżka"    = Katalog wyjściowy (bez tego nadpisuje oryginały)
+
+
+PRZYKŁADY ZAAWANSOWANE:
+-----------------------
+
+Maksymalne pogrubienie linii (5) + wysoki kontrast (3.0) + extra enhance:
+   run.bat -d "ścieżka" -r -t 5 -c 3.0 -e
+
+Delikatniejsze przetwarzanie (grubość 2, kontrast 1.5):
+   run.bat -d "ścieżka" -r -t 2 -c 1.5
+
+
+UWAGA:
+------
+- Bez opcji -od program NADPISUJE oryginalne pliki!
+- Zrób kopię zapasową przed pierwszym uruchomieniem!
+- Program przetwarza tylko pliki PNG
+- Opcja -r przeszukuje wszystkie podkatalogi
+
+===============================================
+Aby zobaczyć pełną pomoc: run.bat -h
+===============================================
+

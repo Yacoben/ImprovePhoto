@@ -9,17 +9,19 @@ import numpy as np
 import cv2
 
 
-def enhance_cad_image(input_path: str, output_path: str, line_thickness: int = 3,
-                       contrast_boost: float = 2.0, sharpen: bool = True) -> bool:
+def enhance_cad_image(input_path: str, output_path: str, line_thickness: int = 4,
+                       contrast_boost: float = 2.5, sharpen: bool = True,
+                       extra_enhance: bool = False) -> bool:
     """
     Poprawia jakość zdjęcia CAD poprzez pogrubienie linii i zwiększenie kontrastu.
 
     Args:
         input_path: Ścieżka do pliku wejściowego
         output_path: Ścieżka do pliku wyjściowego
-        line_thickness: Grubość pogrubienia linii (1-5, domyślnie 2)
-        contrast_boost: Współczynnik zwiększenia kontrastu (domyślnie 1.5)
+        line_thickness: Grubość pogrubienia linii (1-5, domyślnie 4)
+        contrast_boost: Współczynnik zwiększenia kontrastu (domyślnie 2.5)
         sharpen: Czy zastosować wyostrzanie (domyślnie True)
+        extra_enhance: Czy zastosować dodatkowe wzmocnienie dla maksymalnej widoczności (domyślnie False)
 
     Returns:
         True jeśli operacja się powiodła, False w przeciwnym razie
@@ -66,6 +68,15 @@ def enhance_cad_image(input_path: str, output_path: str, line_thickness: int = 3
             # Zwiększamy liczbę iteracji dla grubszych linii
             iterations = 1 if line_thickness <= 2 else 2
             binary = cv2.dilate(binary, kernel, iterations=iterations)
+
+        # Dodatkowe wzmocnienie dla maksymalnej widoczności
+        if extra_enhance:
+            # Dodatkowa dylacja z mniejszym jądrem dla wygładzenia
+            kernel_smooth = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
+            binary = cv2.dilate(binary, kernel_smooth, iterations=1)
+            # Morfologiczne zamknięcie - łączy przerwane linie
+            kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel_close)
 
         # Inwersja z powrotem: białe linie na czarnym tle -> czarne linie na białym tle
         result_gray = cv2.bitwise_not(binary)
@@ -120,18 +131,20 @@ def enhance_cad_image(input_path: str, output_path: str, line_thickness: int = 3
 
 
 def process_directory(input_dir: str, output_dir: str = None,
-                      line_thickness: int = 3, contrast_boost: float = 2.0,
-                      sharpen: bool = True, recursive: bool = False) -> tuple:
+                      line_thickness: int = 4, contrast_boost: float = 2.5,
+                      sharpen: bool = True, recursive: bool = True,
+                      extra_enhance: bool = False) -> tuple:
     """
     Przetwarza wszystkie obrazy PNG w katalogu.
 
     Args:
         input_dir: Katalog z plikami wejściowymi
         output_dir: Katalog na pliki wyjściowe (domyślnie: nadpisuje oryginalne pliki)
-        line_thickness: Grubość pogrubienia linii
-        contrast_boost: Współczynnik zwiększenia kontrastu
-        sharpen: Czy zastosować wyostrzanie
-        recursive: Czy przetwarzać podkatalogi
+        line_thickness: Grubość pogrubienia linii (domyślnie 4)
+        contrast_boost: Współczynnik zwiększenia kontrastu (domyślnie 2.5)
+        sharpen: Czy zastosować wyostrzanie (domyślnie True)
+        recursive: Czy przetwarzać podkatalogi (domyślnie True)
+        extra_enhance: Czy zastosować dodatkowe wzmocnienie (domyślnie False)
 
     Returns:
         Tuple (liczba_przetworzonych, liczba_błędów)
@@ -178,7 +191,7 @@ def process_directory(input_dir: str, output_dir: str = None,
             output_file = png_file
 
         if enhance_cad_image(str(png_file), str(output_file),
-                             line_thickness, contrast_boost, sharpen):
+                             line_thickness, contrast_boost, sharpen, extra_enhance):
             success_count += 1
         else:
             error_count += 1
@@ -187,8 +200,8 @@ def process_directory(input_dir: str, output_dir: str = None,
 
 
 def process_single_file(input_file: str, output_file: str = None,
-                        line_thickness: int = 3, contrast_boost: float = 2.0,
-                        sharpen: bool = True) -> bool:
+                        line_thickness: int = 4, contrast_boost: float = 2.5,
+                        sharpen: bool = True, extra_enhance: bool = False) -> bool:
     """
     Przetwarza pojedynczy plik obrazu.
 
@@ -198,6 +211,7 @@ def process_single_file(input_file: str, output_file: str = None,
         line_thickness: Grubość pogrubienia linii
         contrast_boost: Współczynnik zwiększenia kontrastu
         sharpen: Czy zastosować wyostrzanie
+        extra_enhance: Czy zastosować dodatkowe wzmocnienie
 
     Returns:
         True jeśli operacja się powiodła
@@ -215,7 +229,7 @@ def process_single_file(input_file: str, output_file: str = None,
         output_path = Path(output_file)
 
     return enhance_cad_image(str(input_path), str(output_path),
-                             line_thickness, contrast_boost, sharpen)
+                             line_thickness, contrast_boost, sharpen, extra_enhance)
 
 
 def main():
@@ -229,10 +243,10 @@ def main():
 Przykłady użycia:
   python main.py obraz.png                    # Przetwarza plik (nadpisuje oryginalny)
   python main.py obraz.png -o wynik.png       # Przetwarza z określoną nazwą wyjściową
-  python main.py -d ./zdjecia                 # Przetwarza cały katalog (nadpisuje pliki)
-  python main.py -d ./zdjecia -t 3 -c 2.0     # Grubsze linie, większy kontrast
-  python main.py -d ./zdjecia -od ./wyniki    # Zapisuje do osobnego folderu
-  python main.py -d ./zdjecia -r              # Rekurencyjnie (z podkatalogami)
+  python main.py -d ./zdjecia -r              # Przetwarza katalog z podkatalogami (nadpisuje)
+  python main.py -d ./zdjecia -r -t 5 -c 3.0  # Maksymalna grubość i kontrast
+  python main.py -d ./zdjecia -r -e           # Z dodatkowym wzmocnieniem linii
+  python main.py -d ./zdjecia -od ./wyniki -r # Zapisuje do osobnego folderu
         """
     )
 
@@ -240,14 +254,16 @@ Przykłady użycia:
     parser.add_argument("-o", "--output", help="Ścieżka do pliku wyjściowego")
     parser.add_argument("-d", "--directory", help="Katalog z plikami do przetworzenia")
     parser.add_argument("-od", "--output-dir", help="Katalog na pliki wyjściowe")
-    parser.add_argument("-t", "--thickness", type=int, default=3, choices=range(1, 6),
-                        help="Grubość pogrubienia linii (1-5, domyślnie: 3)")
-    parser.add_argument("-c", "--contrast", type=float, default=2.0,
-                        help="Współczynnik kontrastu (domyślnie: 2.0)")
+    parser.add_argument("-t", "--thickness", type=int, default=4, choices=range(1, 6),
+                        help="Grubość pogrubienia linii (1-5, domyślnie: 4)")
+    parser.add_argument("-c", "--contrast", type=float, default=2.5,
+                        help="Współczynnik kontrastu (domyślnie: 2.5)")
     parser.add_argument("-ns", "--no-sharpen", action="store_true",
                         help="Wyłącz wyostrzanie")
     parser.add_argument("-r", "--recursive", action="store_true",
                         help="Przetwarzaj podkatalogi rekurencyjnie")
+    parser.add_argument("-e", "--extra-enhance", action="store_true",
+                        help="Dodatkowe wzmocnienie dla maksymalnej widoczności linii")
 
     args = parser.parse_args()
 
@@ -261,7 +277,8 @@ Przykłady użycia:
             args.thickness,
             args.contrast,
             sharpen,
-            args.recursive
+            args.recursive,
+            args.extra_enhance
         )
         print(f"\nZakończono: {success} plików przetworzonych, {errors} błędów.")
         return 0 if errors == 0 else 1
@@ -269,7 +286,7 @@ Przykłady użycia:
     elif args.input:
         # Tryb pojedynczego pliku
         if process_single_file(args.input, args.output, args.thickness,
-                               args.contrast, sharpen):
+                               args.contrast, sharpen, args.extra_enhance):
             print("Przetwarzanie zakończone pomyślnie.")
             return 0
         else:
