@@ -128,10 +128,6 @@ Make sure Python 3.13 is installed at:
 - The program processes PNG files only
 - Alpha channel (transparency) is preserved if present
 
-## Author
-
-Created to improve the quality of structural component thumbnails from CAD Inventor for PDF documentation purposes.
-
 ## License
 
 Copyright © Jakub Balcerzak. All rights reserved.
