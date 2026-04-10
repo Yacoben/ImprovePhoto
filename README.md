@@ -1,134 +1,138 @@
-# ImprovePhoto - Program do poprawiania jakości miniatur CAD
+# ImprovePhoto - CAD Thumbnail Quality Improvement Tool
 
-Program do poprawiania jakości zdjęć miniatur elementów konstrukcyjnych z programu CAD Inventor.
-Pogrubia czarne linie na białym tle dla lepszej widoczności w dokumentach PDF.
+A tool for improving the quality of structural component thumbnail images exported from CAD Inventor.
+It thickens black lines on a white background for better visibility in PDF documents.
 
-## Wymagania
+## Requirements
 
-- Python 3.12 lub nowszy
-- Zainstalowane pakiety: opencv-python, numpy, Pillow (automatycznie zainstalowane z requirements.txt)
+- Python 3.12 or newer
+- Required packages: opencv-python, numpy, Pillow (automatically installed from requirements.txt)
 
-## Instalacja
+## Installation
 
-Pakiety zostały już zainstalowane. W razie potrzeby reinstalacji:
+Packages should already be installed. To reinstall if needed:
 
 ```batch
 C:\Users\User\AppData\Local\Programs\Python\Python313\python.exe -m pip install -r requirements.txt
 ```
 
-## Użycie
+## Usage
 
-### Metoda 1: Użycie skryptu run.bat (ZALECANE)
+### Method 1: Using the run.bat script (RECOMMENDED)
 
-Najprościej uruchomić program korzystając z przygotowanego skryptu `run.bat`:
-
-```batch
-run.bat -d "ścieżka\do\katalogu" -r
-```
-
-### Metoda 2: Bezpośrednie uruchomienie Pythona
+The easiest way to run the program is with the provided `run.bat` script:
 
 ```batch
-C:\Users\User\AppData\Local\Programs\Python\Python313\python.exe main.py [opcje]
+run.bat -d "path\to\directory" -r
 ```
 
-## Opcje programu
+### Method 2: Running Python directly
 
-- `input` - Ścieżka do pojedynczego pliku PNG do przetworzenia
-- `-o`, `--output` - Ścieżka do pliku wyjściowego
-- `-d`, `--directory` - Katalog z plikami do przetworzenia
-- `-od`, `--output-dir` - Katalog na pliki wyjściowe (jeśli nie podano, nadpisuje oryginały)
-- `-t`, `--thickness` - Grubość pogrubienia linii (1-5, domyślnie: 4)
-- `-c`, `--contrast` - Współczynnik kontrastu (domyślnie: 2.5)
-- `-ns`, `--no-sharpen` - Wyłącz wyostrzanie
-- `-r`, `--recursive` - Przetwarzaj podkatalogi rekurencyjnie
-- `-e`, `--extra-enhance` - Dodatkowe wzmocnienie dla MAKSYMALNEJ widoczności linii
-
-## Przykłady użycia
-
-### Przetwarzanie pojedynczego pliku (nadpisanie oryginału):
 ```batch
-run.bat obraz.png
+C:\Users\User\AppData\Local\Programs\Python\Python313\python.exe main.py [options]
 ```
 
-### Przetwarzanie pojedynczego pliku (z zachowaniem oryginału):
+## Program Options
+
+- `input` - Path to a single PNG file to process
+- `-o`, `--output` - Path to the output file
+- `-d`, `--directory` - Directory containing files to process
+- `-od`, `--output-dir` - Output directory for processed files (if not provided, originals are overwritten)
+- `-t`, `--thickness` - Line thickening amount (1–5, default: 4)
+- `-c`, `--contrast` - Contrast factor (default: 2.5)
+- `-ns`, `--no-sharpen` - Disable sharpening
+- `-r`, `--recursive` - Process subdirectories recursively
+- `-e`, `--extra-enhance` - Additional enhancement for MAXIMUM line visibility
+
+## Usage Examples
+
+### Process a single file (overwrite original):
 ```batch
-run.bat obraz.png -o obraz_poprawiony.png
+run.bat image.png
 ```
 
-### Przetwarzanie całego katalogu (nadpisywanie plików w miejscu):
+### Process a single file (keep original):
 ```batch
-run.bat -d "X:\0.0.0.0 MINIATURY ELEMENTÓW" -r
+run.bat image.png -o image_improved.png
 ```
 
-### Przetwarzanie z maksymalną widocznością linii:
+### Process an entire directory (overwrite files in place):
 ```batch
-run.bat -d "X:\0.0.0.0 MINIATURY ELEMENTÓW" -r -e
+run.bat -d "X:\0.0.0.0 COMPONENT THUMBNAILS" -r
 ```
 
-### Przetwarzanie z niestandardowymi parametrami:
+### Process with maximum line visibility:
 ```batch
-run.bat -d ".\zdjecia" -r -t 5 -c 3.0 -e
+run.bat -d "X:\0.0.0.0 COMPONENT THUMBNAILS" -r -e
 ```
-(Maksymalna grubość linii: 5, wysoki kontrast: 3.0, dodatkowe wzmocnienie)
 
-### Przetwarzanie do osobnego katalogu (zachowuje oryginały):
+### Process with custom parameters:
 ```batch
-run.bat -d ".\zdjecia" -od ".\zdjecia_poprawione" -r
+run.bat -d ".\photos" -r -t 5 -c 3.0 -e
 ```
+(Maximum line thickness: 5, high contrast: 3.0, extra enhancement)
 
-## Jak działa program
-
-Program wykonuje następujące operacje:
-
-1. **Wczytanie obrazu** - Obsługuje PNG z przezroczystością i polskimi znakami w ścieżce
-2. **Konwersja do skali szarości** - Przygotowanie do analizy
-3. **Zwiększenie kontrastu** - Wstępne zwiększenie różnicy między liniami a tłem
-4. **Binaryzacja adaptacyjna** - Wykrywa linie o różnej intensywności (2 metody łączone)
-5. **Pogrubienie linii** - Dylacja morfologiczna z konfigurowalnymi parametrami
-6. **Dodatkowe wzmocnienie** (opcja `-e`):
-   - Dodatkowa dylacja dla wygładzenia linii
-   - Morfologiczne zamknięcie - łączy przerwane linie
-7. **Zwiększenie kontrastu CLAHE** - Adaptacyjna normalizacja
-8. **Wyostrzanie** - Kernel sharpening dla lepszej ostrości krawędzi
-9. **Zapis z kompresją** - PNG z maksymalną kompresją dla mniejszych plików
-
-## Rozwiązywanie problemów
-
-### Błąd: "Nie można wczytać obrazu"
-- Sprawdź czy ścieżka jest poprawna
-- Upewnij się, że plik jest w formacie PNG
-- Sprawdź czy masz uprawnienia do odczytu pliku
-
-### Linie są za cienkie
-Użyj opcji `-e` (extra-enhance) dla maksymalnej widoczności:
+### Process to a separate output directory (preserves originals):
 ```batch
-run.bat -d "katalog" -r -e
+run.bat -d ".\photos" -od ".\photos_improved" -r
 ```
 
-Lub zwiększ parametr thickness do 5:
+## How It Works
+
+The program performs the following operations:
+
+1. **Load image** - Supports PNG with transparency and special characters in the file path
+2. **Convert to grayscale** - Prepares the image for analysis
+3. **Increase contrast** - Initial enhancement of the difference between lines and background
+4. **Adaptive binarization** - Detects lines of varying intensity (2 methods combined)
+5. **Line thickening** - Morphological dilation with configurable parameters
+6. **Extra enhancement** (option `-e`):
+   - Additional dilation to smooth lines
+   - Morphological closing — connects broken lines
+7. **CLAHE contrast enhancement** - Adaptive normalization
+8. **Sharpening** - Kernel sharpening for better edge clarity
+9. **Save with compression** - PNG with maximum compression for smaller file sizes
+
+## Troubleshooting
+
+### Error: "Cannot load image"
+- Check that the file path is correct
+- Make sure the file is in PNG format
+- Verify that you have read permissions for the file
+
+### Lines are too thin
+Use the `-e` (extra-enhance) option for maximum visibility:
 ```batch
-run.bat -d "katalog" -r -t 5
+run.bat -d "directory" -r -e
 ```
 
-### Linie są za grube
-Zmniejsz parametr thickness:
+Or increase the thickness parameter to 5:
 ```batch
-run.bat -d "katalog" -r -t 2
+run.bat -d "directory" -r -t 5
 ```
 
-### Program nie znajduje Pythona
-Upewnij się, że Python 3.13 jest zainstalowany w:
+### Lines are too thick
+Decrease the thickness parameter:
+```batch
+run.bat -d "directory" -r -t 2
+```
+
+### Python not found
+Make sure Python 3.13 is installed at:
 `C:\Users\User\AppData\Local\Programs\Python\Python313\`
 
-## Uwagi
+## Notes
 
-- Program domyślnie **nadpisuje oryginalne pliki** - upewnij się, że masz kopię zapasową lub użyj opcji `-od` do zapisu w osobnym katalogu
-- Opcja `-r` (recursive) przeszukuje wszystkie podkatalogi
-- Program przetwarza tylko pliki PNG
-- Zachowuje kanał alfa (przezroczystość) jeśli istnieje
+- By default, the program **overwrites the original files** — make sure you have a backup, or use the `-od` option to save to a separate directory
+- The `-r` (recursive) option searches all subdirectories
+- The program processes PNG files only
+- Alpha channel (transparency) is preserved if present
 
-## Autor
+## Author
 
-Program stworzony do poprawy jakości miniatur elementów konstrukcyjnych z CAD Inventor dla celów dokumentacji PDF.
+Created to improve the quality of structural component thumbnails from CAD Inventor for PDF documentation purposes.
+
+## License
+
+Copyright © Jakub Balcerzak. All rights reserved.
 
